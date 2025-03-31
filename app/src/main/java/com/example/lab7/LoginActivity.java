@@ -38,7 +38,6 @@ public class LoginActivity extends AppCompatActivity {
                     savedUsername.equalsIgnoreCase(inputUsername) &&
                     savedPassword.equalsIgnoreCase(inputPassword)) {
                 Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
-                // Переход к активности с чтением файла
                 startActivity(new Intent(this, FileActivity.class));
             } else {
                 Toast.makeText(this, "Login Failed", Toast.LENGTH_SHORT).show();

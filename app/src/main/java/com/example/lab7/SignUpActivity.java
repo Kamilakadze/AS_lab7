@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 public class SignUpActivity extends AppCompatActivity {
     private EditText edUsername, edPassword, edConfirmPassword;
     private Button btnCreateUser;
-
     private final String CREDENTIAL_SHARED_PREF = "our_shared_pref";
 
     @Override

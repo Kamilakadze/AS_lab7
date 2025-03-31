@@ -14,6 +14,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,8 +22,9 @@ import java.util.Date;
 
 public class FileActivity extends AppCompatActivity {
 
-    public static final int REQUEST_CODE_WRITE_PERM = 401;
+    public static final int REQUEST_CODE_PERMISSIONS = 402;
     private TextView tvFileData;
+    private final String FILE_PATH = Environment.getExternalStorageDirectory() + "/lab7_test.txt";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,47 +45,54 @@ public class FileActivity extends AppCompatActivity {
         btnReadFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String data = readFile();
-                tvFileData.setText(data);
+                File file = new File(FILE_PATH);
+                if (file.exists()) {
+                    String data = readFile();
+                    tvFileData.setText(data);
+                } else {
+                    Toast.makeText(FileActivity.this, "File does not exist", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
-        requestWritePermission();
+        requestPermissions();
     }
 
-    private void requestWritePermission() {
+    private void requestPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                Toast.makeText(this, "Permission needed for file operations", Toast.LENGTH_SHORT).show();
-            }
+                != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    REQUEST_CODE_WRITE_PERM);
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+                    REQUEST_CODE_PERMISSIONS);
         } else {
-            Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Permissions granted", Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == REQUEST_CODE_WRITE_PERM) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "WRITE_EXTERNAL_STORAGE granted", Toast.LENGTH_SHORT).show();
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                    grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "READ/WRITE permissions granted", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Permissions Denied", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
     private void writeFile(String data) {
-        String filePath = Environment.getExternalStorageDirectory() + "/lab7_test.txt";
         FileOutputStream fos = null;
         try {
-            fos = new FileOutputStream(filePath);
+            fos = new FileOutputStream(FILE_PATH);
             fos.write(data.getBytes());
             fos.flush();
-            Toast.makeText(this, "File Written: " + filePath, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "File Written: " + FILE_PATH, Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, "Error writing file", Toast.LENGTH_SHORT).show();
@@ -92,18 +101,16 @@ public class FileActivity extends AppCompatActivity {
                 try {
                     fos.close();
                 } catch (IOException e) {
-                    // Handle exception
                 }
             }
         }
     }
 
     private String readFile() {
-        String filePath = Environment.getExternalStorageDirectory() + "/lab7_test.txt";
         FileInputStream fis = null;
         String result;
         try {
-            fis = new FileInputStream(filePath);
+            fis = new FileInputStream(FILE_PATH);
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             int ch;
             while ((ch = fis.read()) != -1) {
@@ -118,7 +125,6 @@ public class FileActivity extends AppCompatActivity {
                 try {
                     fis.close();
                 } catch (IOException e) {
-                    // Handle exception
                 }
             }
         }
